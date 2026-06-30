@@ -32,15 +32,9 @@ import {
 } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
-import { propertySchema } from '@/lib/validations';
+import { propertySchema, PropertyFormData } from '@/lib/validations';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-
-// Dynamic import for client-side only component
-const ClientOnly = dynamic(() => Promise.resolve(({ children }: { children: React.ReactNode }) => <>{children}</>), {
-  ssr: false,
-});
 
 export default function AddPropertyPage() {
   const router = useRouter();
@@ -49,7 +43,7 @@ export default function AddPropertyPage() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [activeTab, setActiveTab] = useState('form');
 
-  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       elevator: false,
@@ -70,7 +64,7 @@ export default function AddPropertyPage() {
       'image/*': ['.png', '.jpg', '.jpeg', '.webp']
     },
     maxFiles: 10,
-    maxSize: 5 * 1024 * 1024, // 5MB
+    maxSize: 5 * 1024 * 1024,
   });
 
   const removeImage = (index: number) => {
@@ -85,13 +79,12 @@ export default function AddPropertyPage() {
     }
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: PropertyFormData) => {
     try {
       console.log('Form data:', data);
       console.log('Images:', images);
       console.log('PDF:', pdfFile);
       
-      // Here you would typically send this data to your API
       toast.success('Property added successfully!');
       router.push('/properties');
     } catch (error) {
@@ -131,7 +124,6 @@ export default function AddPropertyPage() {
 
         <TabsContent value="form">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Property Type */}
             <Card>
               <CardHeader>
                 <CardTitle>Property Details</CardTitle>
@@ -141,7 +133,7 @@ export default function AddPropertyPage() {
                   <div className="space-y-2">
                     <Label>{t('properties.type')}</Label>
                     <Select 
-                      onValueChange={(value) => setValue('type', value as any)}
+                      onValueChange={(value: PropertyFormData['type']) => setValue('type', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder={t('properties.type')} />
@@ -154,7 +146,7 @@ export default function AddPropertyPage() {
                       </SelectContent>
                     </Select>
                     {errors.type && (
-                      <p className="text-sm text-destructive">{errors.type.message as string}</p>
+                      <p className="text-sm text-destructive">{errors.type.message}</p>
                     )}
                   </div>
 
@@ -168,7 +160,7 @@ export default function AddPropertyPage() {
                       className={errors.area ? 'border-destructive' : ''}
                     />
                     {errors.area && (
-                      <p className="text-sm text-destructive">{errors.area.message as string}</p>
+                      <p className="text-sm text-destructive">{errors.area.message}</p>
                     )}
                   </div>
 
@@ -205,7 +197,7 @@ export default function AddPropertyPage() {
                   <div className="flex items-center space-x-2">
                     <Switch
                       id="elevator"
-                      onCheckedChange={(checked) => setValue('elevator', checked)}
+                      onCheckedChange={(checked: boolean) => setValue('elevator', checked)}
                     />
                     <Label htmlFor="elevator">{t('properties.elevator')}</Label>
                   </div>
@@ -233,7 +225,6 @@ export default function AddPropertyPage() {
               </CardContent>
             </Card>
 
-            {/* Image Upload */}
             <Card>
               <CardHeader>
                 <CardTitle>{t('properties.images')}</CardTitle>
@@ -260,7 +251,7 @@ export default function AddPropertyPage() {
                 {images.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     {images.map((file, index) => (
-                      <div key={index} className="relative group">
+                      <div key={`${file.name}-${index}`} className="relative group">
                         <img
                           src={URL.createObjectURL(file)}
                           alt={`Upload ${index + 1}`}

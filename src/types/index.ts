@@ -5,7 +5,7 @@ export interface User {
   memberId: string;
   name: string;
   role: UserRole;
-  parentId?: string; // For member hierarchy
+  parentId?: string;
   avatar?: string;
 }
 
@@ -50,4 +50,29 @@ export interface Activity {
 export interface Language {
   code: 'en' | 'fa';
   dir: 'ltr' | 'rtl';
+}
+
+// Form data types
+export interface LoginFormData {
+  memberId: string;
+  password: string;
+}
+
+export interface RegisterFormData {
+  name: string;
+  memberId: string;
+  password: string;
+  confirmPassword: string;
+  parentId?: string;
+}
+
+export interface PropertyFormData {
+  type: 'apartment' | 'villa' | 'land' | 'commercial';
+  area: number;
+  elevator: boolean;
+  parkingSpots: number;
+  rooms: number;
+  yearBuilt: number;
+  description?: string;
+  price?: number;
 }

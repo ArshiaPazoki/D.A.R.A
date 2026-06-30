@@ -1,33 +1,32 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, UserRole } from '@/types';
 import { mockUsers } from './mock-data';
 
 interface AuthContextType {
   user: User | null;
   login: (memberId: string, password: string) => Promise<boolean>;
-  register: (userData: Partial<User> & { password: string }) => Promise<boolean>;
+  register: (userData: { name: string; memberId: string; password: string; parentId?: string }) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('dara_user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      setUser(JSON.parse(storedUser) as User);
     }
     setIsLoading(false);
   }, []);
 
   const login = async (memberId: string, password: string): Promise<boolean> => {
-    // Mock login - bypass with specific credentials
     if (password !== 'password123') return false;
     
     const foundUser = mockUsers.find(u => u.memberId === memberId);
@@ -38,11 +37,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
-  const register = async (userData: Partial<User> & { password: string }): Promise<boolean> => {
+  const register = async (userData: { name: string; memberId: string; password: string; parentId?: string }): Promise<boolean> => {
     const newUser: User = {
       id: String(mockUsers.length + 1),
-      memberId: userData.memberId || '',
-      name: userData.name || '',
+      memberId: userData.memberId,
+      name: userData.name,
       role: 'member',
       parentId: userData.parentId,
     };
@@ -65,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
