@@ -35,6 +35,12 @@ import { useTranslation } from '@/hooks/use-translation';
 import { propertySchema } from '@/lib/validations';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
+// Dynamic import for client-side only component
+const ClientOnly = dynamic(() => Promise.resolve(({ children }: { children: React.ReactNode }) => <>{children}</>), {
+  ssr: false,
+});
 
 export default function AddPropertyPage() {
   const router = useRouter();
@@ -43,12 +49,14 @@ export default function AddPropertyPage() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [activeTab, setActiveTab] = useState('form');
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       elevator: false,
       parkingSpots: 0,
       rooms: 0,
+      area: 0,
+      yearBuilt: 1402,
     },
   });
 
@@ -78,12 +86,17 @@ export default function AddPropertyPage() {
   };
 
   const onSubmit = async (data: any) => {
-    console.log('Form data:', data);
-    console.log('Images:', images);
-    console.log('PDF:', pdfFile);
-    
-    toast.success('Property added successfully!');
-    router.push('/properties');
+    try {
+      console.log('Form data:', data);
+      console.log('Images:', images);
+      console.log('PDF:', pdfFile);
+      
+      // Here you would typically send this data to your API
+      toast.success('Property added successfully!');
+      router.push('/properties');
+    } catch (error) {
+      toast.error('Failed to add property');
+    }
   };
 
   return (
@@ -127,7 +140,9 @@ export default function AddPropertyPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{t('properties.type')}</Label>
-                    <Select onValueChange={(value) => register('type').onChange({ target: { value } })}>
+                    <Select 
+                      onValueChange={(value) => setValue('type', value as any)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder={t('properties.type')} />
                       </SelectTrigger>
@@ -190,7 +205,7 @@ export default function AddPropertyPage() {
                   <div className="flex items-center space-x-2">
                     <Switch
                       id="elevator"
-                      {...register('elevator')}
+                      onCheckedChange={(checked) => setValue('elevator', checked)}
                     />
                     <Label htmlFor="elevator">{t('properties.elevator')}</Label>
                   </div>
