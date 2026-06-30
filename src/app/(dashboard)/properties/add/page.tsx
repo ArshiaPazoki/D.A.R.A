@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,7 +37,7 @@ import type { PropertyFormData } from '@/lib/validations';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
-export default function AddPropertyPage() {
+function PropertyForm() {
   const router = useRouter();
   const { t } = useTranslation();
   const [images, setImages] = useState<File[]>([]);
@@ -55,9 +55,9 @@ export default function AddPropertyPage() {
     },
   });
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const onDrop = (acceptedFiles: File[]) => {
     setImages(prev => [...prev, ...acceptedFiles]);
-  }, []);
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -319,4 +319,22 @@ export default function AddPropertyPage() {
       </Tabs>
     </div>
   );
+}
+
+export default function AddPropertyPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return <PropertyForm />;
 }

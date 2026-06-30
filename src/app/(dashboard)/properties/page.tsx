@@ -1,17 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Plus,
   Search,
-  Filter,
   Grid3X3,
   List,
   MoreHorizontal,
   Edit,
   Trash2,
   Eye,
-  Download,
   Home,
   Building2,
   Warehouse,
@@ -41,7 +39,7 @@ import { getStatusColor, formatPrice } from '@/lib/utils';
 import { Property } from '@/types';
 import Link from 'next/link';
 
-export default function PropertiesPage() {
+function PropertiesList() {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -89,7 +87,6 @@ export default function PropertiesPage() {
         </Button>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -142,7 +139,6 @@ export default function PropertiesPage() {
         </div>
       </div>
 
-      {/* Properties Grid */}
       <div className={`grid gap-4 ${
         viewMode === 'grid' 
           ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
@@ -313,4 +309,22 @@ export default function PropertiesPage() {
       </div>
     </div>
   );
+}
+
+export default function PropertiesPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return <PropertiesList />;
 }
