@@ -22,7 +22,12 @@ export const propertySchema = z.object({
   elevator: z.boolean(),
   parkingSpots: z.number().min(0),
   rooms: z.number().min(0),
-  yearBuilt: z.number().min(1300).max(1450), // Persian year
+  yearBuilt: z.number().min(1300).max(1450),
   description: z.string().optional(),
   price: z.number().optional(),
 });
+
+// Export inferred types
+export type LoginFormData = z.infer<typeof loginSchema>;
+export type RegisterFormData = z.infer<typeof registerSchema>;
+export type PropertyFormData = z.infer<typeof propertySchema>;
