@@ -32,7 +32,8 @@ import {
 } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/use-translation';
-import { propertySchema, PropertyFormData } from '@/lib/validations';
+import { propertySchema } from '@/lib/validations';
+import type { PropertyFormData } from '@/lib/validations';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
